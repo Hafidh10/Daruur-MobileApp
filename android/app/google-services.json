@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "97792142793",
+    "project_id": "skiive",
+    "storage_bucket": "skiive.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:97792142793:android:e5b3692fa4ff68431ecc18",
+        "android_client_info": {
+          "package_name": "com.example.skiive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "97792142793-61uganonf3q1cl6iert9ugqq3854banc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.skiive",
+            "certificate_hash": "8fdd9c87682bf18737d239d24d901cc0816551fa"
+          }
+        },
+        {
+          "client_id": "97792142793-jvh29hn3q47762gv7r0g3a04q5be36be.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQtQfJzlRDHY5ciomMyVtN8l9OWg5GF0c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97792142793-jvh29hn3q47762gv7r0g3a04q5be36be.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "97792142793-038a7etta2320jiggivrseicm25i53d0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.skiive.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -42,7 +42,7 @@ class AuthMethods {
       prefs.setString("Name", name!);
       prefs.setString("Email", email!);
       prefs.setString("Photo", photo!);
-      // print(userDetails.uid);
+      // print('Helooooooooooo: ${googleSignInAuthentication?.idToken}');
       Map<String, dynamic> userInfoMap = {
         "email": userDetails.email,
         "name": userDetails.displayName,

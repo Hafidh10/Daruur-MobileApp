@@ -4,9 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:iconsax/iconsax.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:skiive/features/authentication/screens/courseDetails/course_player.dart';
+import 'package:skiive/features/authentication/screens/courseDetails/course_section.dart';
 import 'package:skiive/features/authentication/screens/courses/courses.dart';
 import 'package:skiive/utils/constants/colors.dart';
 import 'package:skiive/utils/theme/constantThemes/relatedCard.dart';
@@ -18,12 +19,14 @@ import '../../../../utils/http/http_client.dart';
 import '../../../../utils/loaders/loaders.dart';
 
 class DetailsScreen extends StatefulWidget {
+  final String id;
   final String name;
   final String image;
   final String description;
   final String category;
   const DetailsScreen({
     Key? key,
+    required this.id,
     required this.name,
     required this.image,
     required this.description,
@@ -38,19 +41,28 @@ class _DetailsScreenState extends State<DetailsScreen> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String? token;
   String? studentId;
-  String? contentId;
 
   void fetchData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('accessToken');
       studentId = prefs.getString('parameterId');
-      contentId = prefs.getString('id');
     });
   }
 
-  Future<void> startCourse() async {
+  String loading = 'init';
+
+  Future<void> startCourse(id) async {
     try {
+      setState(() {
+        loading = 'processing';
+      });
+      Future.delayed(const Duration(minutes: 1), () {
+        setState(() {
+          loading = 'init';
+        });
+        return false;
+      });
       var headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -59,52 +71,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
       var url =
           Uri.parse(ApiEndPoints.baseUrl + ApiEndPoints.authEndPoints.bookmark);
       Map body = {
-        "courseId": 'a0788d68-5bbf-4827-ad99-9e1d8d40fc5d',
+        "courseId": id,
         "studentId": studentId,
       };
       http.Response response =
           await http.post(url, body: jsonEncode(body), headers: headers);
       if (response.statusCode == 201) {
-        // final json = jsonDecode(response.body);
-        // var token = json['data']['accessToken'];
-        // final jsonEmail = jsonDecode(response.body);
-        // var userEmail = jsonEmail['data']['email'];
-
-        var uriData = Uri.parse(
-            'https://emerge-lms-api.onrender.com/api/v1/course-manager/paid/$studentId');
-        var responseData = await http.get(uriData, headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
+        setState(() {
+          loading = 'complete';
         });
-        final jsonId = jsonDecode(responseData.body);
-        var contentId = jsonId['data']['courseManager'][0];
-        // final jsonlastName = jsonDecode(responseData.body);
-        // var userlastName = jsonlastName['data']['lastName'];
-
-        final SharedPreferences prefs = await _prefs;
-
-        await prefs.setString('id', contentId!);
-        // await prefs?.setString('email', userEmail);
-        // await prefs?.setString('firstName', userfirstName);
-        // await prefs?.setString('lastName', userlastName);
-
-        // email.clear();
-        // password.clear();
         SkiiveLoaders.successSnackBar(
             title: 'Course started Successfully!',
             message: 'Welcome to Emerge Learning Management platform.');
 
         Get.to(() => const CoursesScreen());
-      } else if (response.statusCode == 401) {
-        SkiiveLoaders.warningSnackBar(
-            title: 'Error!',
-            message: "This email or password you entered is incorrect.");
-      } else if (response.statusCode == 403) {
-        SkiiveLoaders.warningSnackBar(
-            title: 'Error!',
-            message:
-                "This email address hasn't been verified. Use the link sent to your email address to complete verification.");
       }
     } catch (e) {
       //Show generic error to user
@@ -112,11 +92,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  late String name, image, description, category;
+  late String id, name, image, description, category;
   @override
   void initState() {
     super.initState();
     fetchData();
+    id = widget.id;
     name = widget.name;
     image = widget.image;
     description = widget.description;
@@ -176,8 +157,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("$contentId",
-                    style: Theme.of(context).textTheme.headlineMedium),
+                Text(name, style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(
                   height: 10,
                 ),
@@ -205,42 +185,41 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   height: 30,
                 ),
                 GestureDetector(
-                  onTap: () {
-                    Get.to(() => CoursePlayer(
-                        name: name,
-                        image: image,
-                        description: description,
-                        category: category));
-                  },
+                  onTap: () {},
                   child: InkWell(
                     onTap: () {
-                      startCourse();
+                      startCourse(id);
                       // Get.to(() => CoursePlayer(
                       //     name: name,
                       //     image: image,
                       //     description: description,
                       //     category: category));
                     },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: SkiiveColors.primary,
-                          borderRadius: BorderRadius.circular(6),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.blue.withOpacity(0.2),
-                                spreadRadius: 5,
-                                blurRadius: 7,
-                                offset: const Offset(0, 2))
-                          ]),
-                      child: const Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Text(
-                          'Start Course',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: SkiiveColors.white),
-                        ),
-                      ),
+                    child: SizedBox(
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: SkiiveColors.primary),
+                          onPressed: () {
+                            startCourse(id);
+                          },
+                          child: loading == 'init'
+                              ? const Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 10.0),
+                                  child: Text('Start Course'),
+                                )
+                              : loading == 'processing'
+                                  ? const SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(
+                                        backgroundColor: Colors.white,
+                                        valueColor: AlwaysStoppedAnimation(
+                                            Color.fromRGBO(172, 173, 189, 0.9)),
+                                        strokeWidth: 1.5,
+                                      ),
+                                    )
+                                  : const Icon(Iconsax.tick_circle)),
                     ),
                   ),
                 ),
@@ -282,15 +261,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 category =
                                                     courses[index].category!;
                                               });
-                                              // Get.to(() => DetailsScreen(
-                                              //       name: courses[index].name!,
-                                              //       image:
-                                              //           courses[index].image!,
-                                              //       description: courses[index]
-                                              //           .description!,
-                                              //       category: courses[index]
-                                              //           .category!,
-                                              //     ));
                                             },
                                             child: RelatedCard(
                                               image: courses[index].image!,

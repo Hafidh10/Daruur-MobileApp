@@ -222,42 +222,37 @@ class HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 30),
                         child: Column(
                           children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                  maxHeight:
-                                      MediaQuery.of(context).size.height),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: GridView.builder(
-                                    itemCount: courses.length,
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,
-                                            mainAxisSpacing: 30,
-                                            crossAxisSpacing: 15,
-                                            mainAxisExtent: 220),
-                                    itemBuilder: (context, index) =>
-                                        GestureDetector(
-                                            onTap: () {
-                                              Get.to(() => DetailsScreen(
-                                                    image:
-                                                        courses[index].image!,
-                                                    name: courses[index].name!,
-                                                    description: courses[index]
-                                                        .description!,
-                                                    category: courses[index]
-                                                        .category!,
-                                                  ));
-                                            },
-                                            child: SkiiveCard(
-                                              // ignore: unnecessary_string_interpolations
-                                              image: courses[index].image!,
-                                              name: courses[index].name!,
-                                            ))),
-                              ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: GridView.builder(
+                                  itemCount: courses.length,
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          mainAxisSpacing: 30,
+                                          crossAxisSpacing: 15,
+                                          mainAxisExtent: 220),
+                                  itemBuilder: (context, index) =>
+                                      GestureDetector(
+                                          onTap: () {
+                                            Get.to(() => DetailsScreen(
+                                                  image: courses[index].image!,
+                                                  name: courses[index].name!,
+                                                  description: courses[index]
+                                                      .description!,
+                                                  category:
+                                                      courses[index].category!,
+                                                  id: courses[index].id!,
+                                                ));
+                                          },
+                                          child: SkiiveCard(
+                                            // ignore: unnecessary_string_interpolations
+                                            image: courses[index].image!,
+                                            name: courses[index].name!,
+                                          ))),
                             )
                           ],
                         ),

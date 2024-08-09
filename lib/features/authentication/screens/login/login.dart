@@ -78,7 +78,7 @@ class LoginScreenState extends State<LoginScreen> {
         var parameterId = jsonId['data']['parameterId'];
 
         var uriData = Uri.parse(
-            'https://emerge-lms-api.onrender.com/api/v1/students/profile');
+            ApiEndPoints.baseUrl + ApiEndPoints.authEndPoints.studentProfile);
         var responseData = await http.get(uriData, headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

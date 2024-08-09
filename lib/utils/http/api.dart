@@ -1,12 +1,14 @@
 import 'dart:convert';
 
+import 'package:skiive/utils/http/http_client.dart';
+
 import '../../models/all_courses_model.dart';
 import 'package:http/http.dart' as http;
 
 class CoursesApi {
   static Future<List<CoursesModel>> getCourses() async {
     var coursesUrl =
-        Uri.parse("https://emerge-lms-api.onrender.com/api/v1/course");
+        Uri.parse(ApiEndPoints.baseUrl + ApiEndPoints.authEndPoints.allCourses);
     final response = await http
         .get(coursesUrl, headers: {"Content-Type": "application/json"});
     var coursesData = json.decode(response.body);

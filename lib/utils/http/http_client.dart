@@ -9,6 +9,7 @@ class _AuthEndPoints {
   final String register = 'auth/signup';
   final String login = 'auth/signin';
   final String studentProfile = 'students/profile';
+  final String allCourses = 'course';
   final String bookmark = 'course-manager/bookmark';
   // final String paid = 'course-manager/paid/';
 }

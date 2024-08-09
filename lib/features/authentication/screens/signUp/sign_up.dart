@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, sort_child_properties_last, unnecessary_nullable_for_final_variable_declarations
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,7 +39,7 @@ class SignUpScreenState extends State<SignUpScreen> {
   //Sign up
   Future<void> signup() async {
     try {
-      //Form Validation
+      // Form validation
       if (!signupFormKey.currentState!.validate()) return;
 
       // Privacy Policy check
@@ -47,15 +48,11 @@ class SignUpScreenState extends State<SignUpScreen> {
             title: 'Accept privacy policy',
             message:
                 'to create account, you must accept the Privacy Policy and terms of Use');
+        return;
       }
+
       setState(() {
         loading = 'processing';
-      });
-      Future.delayed(Duration(minutes: 1), () {
-        setState(() {
-          loading = 'init';
-        });
-        return false;
       });
 
       var headers = {'Content-Type': 'application/json'};
@@ -67,8 +64,10 @@ class SignUpScreenState extends State<SignUpScreen> {
         'lastName': lastName.text.toString(),
         'password': password.text.toString(),
       };
+
       http.Response response =
           await http.post(url, body: jsonEncode(body), headers: headers);
+
       if (response.statusCode == 201) {
         setState(() {
           loading = 'complete';
@@ -97,10 +96,30 @@ class SignUpScreenState extends State<SignUpScreen> {
             title: 'User Exists!',
             message:
                 'This User already exists please use another email to create account');
+      } else {
+        setState(() {
+          loading = 'init';
+        });
+        SkiiveLoaders.errorSnackBar(
+            title: 'Error',
+            message:
+                'An error occurred, please try again later. Status code: ${response.statusCode}');
       }
+    } on HttpException catch (e) {
+      setState(() {
+        loading = 'init';
+      });
+      SkiiveLoaders.errorSnackBar(title: 'HTTP Error', message: e.message);
+    } on FormatException catch (e) {
+      setState(() {
+        loading = 'init';
+      });
+      SkiiveLoaders.errorSnackBar(title: 'JSON Error', message: e.message);
     } catch (e) {
-      //Show generic error to user
-      SkiiveLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      setState(() {
+        loading = 'init';
+      });
+      SkiiveLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
 

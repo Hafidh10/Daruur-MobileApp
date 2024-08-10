@@ -1,38 +1,48 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables, sort_child_properties_last, unnecessary_nullable_for_final_variable_declarations
 
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:skiive/data/repositories/google_auth.dart';
 import 'package:skiive/features/authentication/screens/password/forgot_password.dart';
 import 'package:skiive/features/authentication/screens/signUp/sign_up.dart';
 import 'package:skiive/navigation.dart';
 import 'package:skiive/utils/constants/colors.dart';
 import 'package:skiive/utils/http/http_client.dart';
-import 'package:http/http.dart' as http;
 import 'package:skiive/utils/loaders/loaders.dart';
 import 'package:skiive/utils/validators/validators.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    Key? key,
+    this.tokenId,
+  }) : super(key: key);
+
+  final String? tokenId;
 
   @override
   LoginScreenState createState() => LoginScreenState();
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final hidePassword = true.obs;
-  final privacyPolicy = true.obs;
   TextEditingController email = TextEditingController();
+  String googleLoading = 'init';
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final hidePassword = true.obs;
+  String loading = 'init';
   TextEditingController password = TextEditingController();
+  final privacyPolicy = true.obs;
+  GlobalKey<FormState> signinFormKey = GlobalKey<FormState>();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
-  GlobalKey<FormState> signinFormKey = GlobalKey<FormState>();
-  String loading = 'init';
 
   //Login
   Future<void> login() async {
@@ -126,6 +136,68 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  //Google Sign In
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      setState(() {
+        googleLoading = 'processing';
+      });
+      Future.delayed(Duration(minutes: 1), () {
+        setState(() {
+          googleLoading = 'init';
+        });
+        return false;
+      });
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: [
+          'email',
+          'profile',
+        ],
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      // Get the access token
+      final tokenID = googleAuth?.idToken;
+
+      // Use the access token to authenticate with Google
+      final user = await googleSignIn.currentUser;
+      final googleEmail = user?.email;
+      final googleName = user?.displayName;
+      final photoUrl = user?.photoUrl;
+
+      // Store the user data in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('googleEmail', googleEmail!);
+      await prefs.setString('name', googleName!);
+      await prefs.setString('photoUrl', photoUrl!);
+
+      // Navigate to the navigation screen
+      Get.to(() => Navigation());
+      setState(() {
+        googleLoading = 'complete';
+      });
+    } catch (e) {
+      if (e is PlatformException) {
+        if (e.code == 'sign_in_failed') {
+          // Handle the sign in failed error
+          print('Error signing in with Google: ${e.message}');
+        } else {
+          // Handle other platform exceptions
+          print('Error: ${e.message}');
+        }
+      } else {
+        // Handle other exceptions
+        print('Error: ${e.toString()}');
+      }
+      setState(() {
+        googleLoading = 'init';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,19 +252,6 @@ class LoginScreenState extends State<LoginScreen> {
                           labelText: 'Email',
                         ),
                       ),
-                      // SizedBox(
-                      //   height: 15,
-                      // ),
-                      // TextFormField(
-                      //   controller: ,
-                      //   validator: (value) =>
-                      //       SkiiveValidator.validatePhoneNumber(value),
-                      //   keyboardType: TextInputType.phone,
-                      //   decoration: InputDecoration(
-                      //     prefixIcon: Icon(Iconsax.mobile),
-                      //     labelText: 'Phone Number',
-                      //   ),
-                      // ),
 
                       SizedBox(height: 15),
 
@@ -215,8 +274,6 @@ class LoginScreenState extends State<LoginScreen> {
                           obscureText: hidePassword.value,
                         ),
                       ),
-
-                      // SizedBox(height: 10),
 
                       //Remember me & forgot password
                       Row(
@@ -287,7 +344,8 @@ class LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent),
+                                backgroundColor: Colors.transparent,
+                                side: BorderSide(color: Colors.black)),
                             onPressed: () => Get.to(() => SignUpScreen()),
                             child: Text(
                               'Create Account',
@@ -331,20 +389,34 @@ class LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(color: SkiiveColors.grey),
-                        borderRadius: BorderRadius.circular(100)),
-                    child: IconButton(
-                        onPressed: () {
-                          AuthMethods().signInWithGoogle(context);
-                        },
-                        icon: Image(
-                            width: 26,
-                            height: 26,
-                            image: AssetImage(
-                                'assets/images/icons8-google-48.png'))),
-                  )
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.yellow,
+                          side: BorderSide(color: Colors.green)),
+                      onPressed: () {
+                        _handleGoogleSignIn();
+                      },
+                      child: googleLoading == 'init'
+                          ? Image(
+                              width: 26,
+                              height: 26,
+                              image: AssetImage(
+                                  'assets/images/icons8-google-48.png'))
+                          : googleLoading == 'processing'
+                              ? SizedBox(
+                                  child: CircularProgressIndicator(
+                                    backgroundColor: Colors.black,
+                                    valueColor: AlwaysStoppedAnimation(
+                                        Color.fromRGBO(172, 173, 189, 0.9)),
+                                    strokeWidth: 1.5,
+                                  ),
+                                  height: 16,
+                                  width: 16,
+                                )
+                              : Icon(
+                                  Iconsax.tick_circle,
+                                  color: Colors.blueAccent,
+                                )),
                 ],
               )
             ],

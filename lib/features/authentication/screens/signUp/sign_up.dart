@@ -5,9 +5,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skiive/features/authentication/screens/login/login.dart';
+import 'package:skiive/navigation.dart';
 import 'package:skiive/utils/constants/colors.dart';
 import 'package:skiive/utils/helpers/helper_functions.dart';
 import 'package:skiive/utils/http/http_client.dart';
@@ -36,6 +38,12 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   GlobalKey<FormState> signupFormKey = GlobalKey<FormState>();
   String loading = 'init';
+  String googleLoading = 'init';
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  String? tokenId;
+
+  //Sign up with google
+
   //Sign up
   Future<void> signup() async {
     try {
@@ -310,52 +318,72 @@ class SignUpScreenState extends State<SignUpScreen> {
                       ),
 
                       //dividers
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Flexible(
-                              child: Divider(
-                            color: SkiiveColors.darkGrey,
-                            thickness: 0.5,
-                            indent: 20,
-                            endIndent: 20,
-                          )),
-                          Text(
-                            'or Sign Up with',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                          Flexible(
-                              child: Divider(
-                            color: SkiiveColors.darkGrey,
-                            thickness: 0.5,
-                            indent: 20,
-                            endIndent: 20,
-                          )),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     Flexible(
+                      //         child: Divider(
+                      //       color: SkiiveColors.darkGrey,
+                      //       thickness: 0.5,
+                      //       indent: 20,
+                      //       endIndent: 20,
+                      //     )),
+                      //     Text(
+                      //       'or Sign Up with',
+                      //       style: Theme.of(context).textTheme.labelMedium,
+                      //     ),
+                      //     Flexible(
+                      //         child: Divider(
+                      //       color: SkiiveColors.darkGrey,
+                      //       thickness: 0.5,
+                      //       indent: 20,
+                      //       endIndent: 20,
+                      //     )),
+                      //   ],
+                      // ),
+                      // SizedBox(
+                      //   height: 15,
+                      // ),
                       //Footer
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(color: SkiiveColors.grey),
-                                borderRadius: BorderRadius.circular(100)),
-                            child: IconButton(
-                                onPressed: () {
-                                  AuthMethods().signInWithGoogle(context);
-                                },
-                                icon: Image(
-                                    width: 26,
-                                    height: 26,
-                                    image: AssetImage(
-                                        'assets/images/icons8-google-48.png'))),
-                          )
-                        ],
-                      )
+                      // SizedBox(
+                      //   width: double.infinity,
+                      //   child: ElevatedButton(
+                      //       style: ElevatedButton.styleFrom(
+                      //           backgroundColor: Colors.transparent,
+                      //           side: BorderSide(color: Colors.black)),
+                      //       onPressed: () {},
+                      //       child: googleLoading == 'init'
+                      //           ? Row(
+                      //               mainAxisAlignment: MainAxisAlignment.center,
+                      //               children: [
+                      //                 Text(
+                      //                   'Sign Up with Google',
+                      //                   style: TextStyle(color: Colors.black),
+                      //                 ),
+                      //                 SizedBox(
+                      //                   width: 10,
+                      //                 ),
+                      //                 Image(
+                      //                     width: 26,
+                      //                     height: 26,
+                      //                     image: AssetImage(
+                      //                         'assets/images/icons8-google-48.png'))
+                      //               ],
+                      //             )
+                      //           : googleLoading == 'processing'
+                      //               ? SizedBox(
+                      //                   child: CircularProgressIndicator(
+                      //                     backgroundColor: Colors.black,
+                      //                     valueColor: AlwaysStoppedAnimation(
+                      //                         Color.fromRGBO(
+                      //                             172, 173, 189, 0.9)),
+                      //                     strokeWidth: 1.5,
+                      //                   ),
+                      //                   height: 16,
+                      //                   width: 16,
+                      //                 )
+                      //               : Icon(Iconsax.tick_circle)),
+                      // ),
                     ],
                   ))
             ],

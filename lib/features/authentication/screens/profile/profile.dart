@@ -20,6 +20,9 @@ class ProfileScreenState extends State<ProfileScreen> {
   String? studentFirstName;
   String? studentLastName;
   String? studentEmail;
+  String? googleEmail;
+  String? googleName;
+  String? photoUrl;
 
   @override
   void initState() {
@@ -33,6 +36,9 @@ class ProfileScreenState extends State<ProfileScreen> {
       studentFirstName = prefs.getString('firstName');
       studentLastName = prefs.getString('lastName');
       studentEmail = prefs.getString('email');
+      googleEmail = prefs.getString('googleEmail');
+      googleName = prefs.getString('name');
+      photoUrl = prefs.getString('photoUrl');
     });
   }
 
@@ -61,10 +67,9 @@ class ProfileScreenState extends State<ProfileScreen> {
                     height: 120,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(100),
-                      child: FirebaseAuth.instance.currentUser != null
+                      child: photoUrl != null
                           ? Image(
-                              image: NetworkImage(
-                                  FirebaseAuth.instance.currentUser!.photoURL!),
+                              image: NetworkImage(photoUrl!),
                               fit: BoxFit.cover,
                             )
                           : Image(
@@ -99,36 +104,18 @@ class ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    FirebaseAuth.instance.currentUser != null
-                        ? FirebaseAuth.instance.currentUser!.displayName!
-                        : '$studentFirstName $studentLastName',
+                    googleName ?? '$studentFirstName $studentLastName',
                     style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+                  )
                 ],
               ),
               Text(
-                  FirebaseAuth.instance.currentUser != null
-                      ? FirebaseAuth.instance.currentUser!.email!
-                      : "$studentEmail",
-                  style: Theme.of(context).textTheme.titleSmall),
+                googleEmail ?? "$studentEmail",
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(
                 height: 20,
               ),
-              // Container(
-              //   width: 200,
-              //   decoration: BoxDecoration(
-              //     color: SkiiveColors.primary,
-              //     borderRadius: BorderRadius.circular(10),
-              //   ),
-              //   child: Center(
-              //       child: Padding(
-              //     padding: const EdgeInsets.all(12.0),
-              //     child: Text(
-              //       "Student",
-              //       style: TextStyle(color: Colors.white),
-              //     ),
-              //   )),
-              // ),
               Divider(
                 color: Colors.grey,
               ),
@@ -170,7 +157,6 @@ class ProfileScreenState extends State<ProfileScreen> {
                 iconColor: Colors.red,
                 endIcon: false,
                 onPress: () async {
-                  await FirebaseAuth.instance.signOut();
                   SharedPreferences pref =
                       await SharedPreferences.getInstance();
                   await pref.clear();

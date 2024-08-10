@@ -103,25 +103,6 @@ class HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  // CircularStepProgressIndicator(
-                  //   padding: 0,
-                  //   totalSteps: 10,
-                  //   currentStep: 3,
-                  //   selectedStepSize: 8,
-                  //   unselectedStepSize: 8,
-                  //   selectedColor: SkiiveColors.primary,
-                  //   unselectedColor: Color(0xffeef0f3),
-                  //   roundedCap: (_, __) => true,
-                  //   width: 65,
-                  //   height: 65,
-                  //   child: Center(
-                  //     child: Text(
-                  //       '30%',
-                  //       style: TextStyle(
-                  //           fontSize: 14.5, fontWeight: FontWeight.bold),
-                  //     ),
-                  //   ),
-                  // ),
                 ),
               ),
               SizedBox(

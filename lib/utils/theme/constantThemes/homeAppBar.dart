@@ -15,7 +15,7 @@ class SkiiveHomeAppbar extends StatefulWidget {
 }
 
 class SkiiveHomeAppbarState extends State<SkiiveHomeAppbar> {
-  String? studentName;
+  String? userName;
   String? googleName;
 
   @override
@@ -27,8 +27,8 @@ class SkiiveHomeAppbarState extends State<SkiiveHomeAppbar> {
   void fetchData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      studentName = prefs.getString('firstName');
-      googleName = prefs.getString('Name');
+      userName = prefs.getString('firstName');
+      googleName = prefs.getString('name');
     });
   }
 
@@ -52,9 +52,7 @@ class SkiiveHomeAppbarState extends State<SkiiveHomeAppbar> {
                   width: 5,
                 ),
                 Text(
-                  FirebaseAuth.instance.currentUser != null
-                      ? FirebaseAuth.instance.currentUser!.displayName!
-                      : '$studentName'.toUpperCase(),
+                  googleName ?? userName ?? '',
                   style: Theme.of(context)
                       .textTheme
                       .headlineMedium!

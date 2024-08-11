@@ -28,7 +28,7 @@ class SkiiveHomeAppbarState extends State<SkiiveHomeAppbar> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('firstName');
-      googleName = prefs.getString('name');
+      googleName = prefs.getString('googleName');
     });
   }
 

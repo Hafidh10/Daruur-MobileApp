@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,8 @@ import 'package:skiive/utils/constants/colors.dart';
 import 'package:skiive/utils/http/http_client.dart';
 import 'package:skiive/utils/loaders/loaders.dart';
 import 'package:skiive/utils/validators/validators.dart';
+
+import '../../../../data/repositories/database_method.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -41,6 +44,11 @@ class LoginScreenState extends State<LoginScreen> {
   TextEditingController password = TextEditingController();
   final privacyPolicy = true.obs;
   GlobalKey<FormState> signinFormKey = GlobalKey<FormState>();
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  getCurrentUser() async {
+    return await auth.currentUser;
+  }
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -129,69 +137,125 @@ class LoginScreenState extends State<LoginScreen> {
             title: 'Error!',
             message:
                 "This email address hasn't been verified. Use the link sent to your email address to complete verification.");
+      } else {
+        setState(() {
+          loading = 'init';
+        });
+        // Handle other API errors
+        SkiiveLoaders.errorSnackBar(
+            title: 'Error',
+            message:
+                'An error occurred while logging in. Please try again later.');
       }
     } catch (e) {
-      //Show generic error to user
-      SkiiveLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      // Handle exceptions
+      setState(() {
+        loading = 'init';
+      });
+      SkiiveLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
 
   //Google Sign In
-  Future<void> _handleGoogleSignIn() async {
-    try {
-      setState(() {
-        googleLoading = 'processing';
-      });
-      Future.delayed(Duration(minutes: 1), () {
+  Future<void> signInWithGoogle(BuildContext context) async {
+    setState(() {
+      googleLoading = 'processing';
+    });
+
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
+
+    final GoogleSignInAuthentication? googleSignInAuthentication =
+        await googleSignInAccount?.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.credential(
+        idToken: googleSignInAuthentication?.idToken,
+        accessToken: googleSignInAuthentication?.accessToken);
+
+    UserCredential result = await firebaseAuth.signInWithCredential(credential);
+
+    User? userDetails = result.user;
+    final name = userDetails!.displayName;
+    final email = userDetails.email;
+    final photo = userDetails.photoURL;
+    final uid = userDetails.uid;
+
+    if (result != null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString("uid", uid);
+      prefs.setString("googleName", name!);
+      prefs.setString("googleEmail", email!);
+      prefs.setString("googlePhoto", photo!);
+
+      //Call API
+      var headers = {'Content-Type': 'application/json'};
+      var url = Uri.parse(
+          ApiEndPoints.baseUrl + ApiEndPoints.authEndPoints.googleLogin);
+      Map body = {
+        'email': email,
+        'uid': uid,
+      };
+
+      try {
+        http.Response response =
+            await http.post(url, body: jsonEncode(body), headers: headers);
+        final json = jsonDecode(response.body);
+        var token = json['data']['accessToken'];
+        var parameterId = json['data']['parameterId'];
+
+        final SharedPreferences? prefs = await _prefs;
+
+        await prefs?.setString('accessToken', token);
+        await prefs?.setString('parameterId', parameterId);
+        if (response.statusCode == 201) {
+          setState(() {
+            googleLoading = 'complete';
+          });
+          Get.to(() => const Navigation());
+          Future.delayed(const Duration(seconds: 1), () {
+            setState(() {
+              googleLoading = 'init';
+            });
+          });
+        } else {
+          setState(() {
+            googleLoading = 'init';
+          });
+          // Handle error response
+          SkiiveLoaders.errorSnackBar(
+              title: 'Error', message: 'API error: ${response.statusCode}');
+        }
+      } catch (e) {
+        // Handle exception
+        SkiiveLoaders.errorSnackBar(title: 'Error', message: 'API error: $e');
+        Future.delayed(const Duration(seconds: 1), () {
+          setState(() {
+            googleLoading = 'init';
+          });
+        });
+      }
+
+      Map<String, dynamic> userInfoMap = {
+        "email": userDetails.email,
+        "name": userDetails.displayName,
+        "imgUrl": userDetails.photoURL,
+        "id": userDetails.uid
+      };
+      await DatabaseMethods()
+          .addUser(userDetails.uid, userInfoMap)
+          .then((value) async {
+        setState(() {
+          googleLoading = 'complete';
+        });
+      }).catchError((e) {
         setState(() {
           googleLoading = 'init';
         });
-        return false;
       });
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: [
-          'email',
-          'profile',
-        ],
-      );
-
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
-
-      // Get the access token
-      final tokenID = googleAuth?.idToken;
-
-      // Use the access token to authenticate with Google
-      final user = await googleSignIn.currentUser;
-      final googleEmail = user?.email;
-      final googleName = user?.displayName;
-      final photoUrl = user?.photoUrl;
-
-      // Store the user data in SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('googleEmail', googleEmail!);
-      await prefs.setString('name', googleName!);
-      await prefs.setString('photoUrl', photoUrl!);
-
-      // Navigate to the navigation screen
-      Get.to(() => Navigation());
-      setState(() {
-        googleLoading = 'complete';
-      });
-    } catch (e) {
-      if (e is PlatformException) {
-        if (e.code == 'sign_in_failed') {
-          // Handle the sign in failed error
-          print('Error signing in with Google: ${e.message}');
-        } else {
-          // Handle other platform exceptions
-          print('Error: ${e.message}');
-        }
-      } else {
-        // Handle other exceptions
-        print('Error: ${e.toString()}');
-      }
+    } else {
       setState(() {
         googleLoading = 'init';
       });
@@ -390,33 +454,39 @@ class LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.yellow,
-                          side: BorderSide(color: Colors.green)),
-                      onPressed: () {
-                        _handleGoogleSignIn();
-                      },
-                      child: googleLoading == 'init'
-                          ? Image(
-                              width: 26,
-                              height: 26,
-                              image: AssetImage(
-                                  'assets/images/icons8-google-48.png'))
-                          : googleLoading == 'processing'
-                              ? SizedBox(
-                                  child: CircularProgressIndicator(
-                                    backgroundColor: Colors.black,
-                                    valueColor: AlwaysStoppedAnimation(
-                                        Color.fromRGBO(172, 173, 189, 0.9)),
-                                    strokeWidth: 1.5,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white70,
+                      side: BorderSide(color: Colors.blueAccent, width: 2),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40.0)),
+                    ),
+                    onPressed: () {
+                      signInWithGoogle(context);
+                    },
+                    child: googleLoading == 'init'
+                        ? Image(
+                            width: 26,
+                            height: 26,
+                            image: AssetImage(
+                                'assets/images/icons8-google-48.png'),
+                          )
+                        : googleLoading == 'processing'
+                            ? SizedBox(
+                                child: CircularProgressIndicator(
+                                  backgroundColor: Colors.grey,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    Colors.black,
                                   ),
-                                  height: 16,
-                                  width: 16,
-                                )
-                              : Icon(
-                                  Iconsax.tick_circle,
-                                  color: Colors.blueAccent,
-                                )),
+                                  strokeWidth: 4,
+                                ),
+                                height: 16,
+                                width: 16,
+                              )
+                            : Icon(
+                                Iconsax.tick_circle,
+                                color: Colors.blueAccent,
+                              ),
+                  ),
                 ],
               )
             ],

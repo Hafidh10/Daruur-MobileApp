@@ -57,24 +57,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
       setState(() {
         loading = 'processing';
       });
-      Future.delayed(const Duration(minutes: 1), () {
-        setState(() {
-          loading = 'init';
-        });
-        return false;
-      });
-      var headers = {
+      final token = await _getToken();
+      final studentId = await _getStudentId();
+      final url =
+          Uri.parse(ApiEndPoints.baseUrl + ApiEndPoints.authEndPoints.bookmark);
+      final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       };
-      var url =
-          Uri.parse(ApiEndPoints.baseUrl + ApiEndPoints.authEndPoints.bookmark);
-      Map body = {
+      final body = {
         "courseId": id,
         "studentId": studentId,
       };
-      http.Response response =
+      final response =
           await http.post(url, body: jsonEncode(body), headers: headers);
       if (response.statusCode == 201) {
         setState(() {
@@ -83,13 +79,39 @@ class _DetailsScreenState extends State<DetailsScreen> {
         SkiiveLoaders.successSnackBar(
             title: 'Course started Successfully!',
             message: 'Welcome to Emerge Learning Management platform.');
-
         Get.to(() => const CoursesScreen());
+        Future.delayed(const Duration(seconds: 1), () {
+          setState(() {
+            loading = 'init';
+          });
+        });
+      } else {
+        setState(() {
+          loading = 'error';
+        });
+        SkiiveLoaders.errorSnackBar(title: 'Error', message: response.body);
       }
     } catch (e) {
-      //Show generic error to user
-      SkiiveLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      setState(() {
+        loading = 'error';
+      });
+      SkiiveLoaders.errorSnackBar(title: 'Error', message: e.toString());
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          loading = 'init';
+        });
+      });
     }
+  }
+
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
+
+  Future<String?> _getStudentId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('parameterId');
   }
 
   late String id, name, image, description, category;

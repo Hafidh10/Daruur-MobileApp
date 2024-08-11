@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:skiive/features/authentication/screens/login/login.dart';
 import 'package:skiive/utils/helpers/helper_functions.dart';
 
 class ResetPassScreen extends StatelessWidget {
@@ -52,24 +54,28 @@ class ResetPassScreen extends StatelessWidget {
               //Buttons
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(onPressed: () {}, child: Text("Done")),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Get.to(() => LoginScreen());
+                    },
+                    child: Text("Done")),
               ),
 
               SizedBox(
                 height: 20,
               ),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent),
-                    onPressed: () {},
-                    child: Text(
-                      "Resend Email",
-                      style: TextStyle(color: Colors.black),
-                    )),
-              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton(
+              //       style: ElevatedButton.styleFrom(
+              //           backgroundColor: Colors.transparent),
+              //       onPressed: () {},
+              //       child: Text(
+              //         "Resend Email",
+              //         style: TextStyle(color: Colors.black),
+              //       )),
+              // ),
             ],
           ),
         ),

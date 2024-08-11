@@ -22,7 +22,7 @@ class ProfileScreenState extends State<ProfileScreen> {
   String? studentEmail;
   String? googleEmail;
   String? googleName;
-  String? photoUrl;
+  String? googlePhoto;
 
   @override
   void initState() {
@@ -37,8 +37,8 @@ class ProfileScreenState extends State<ProfileScreen> {
       studentLastName = prefs.getString('lastName');
       studentEmail = prefs.getString('email');
       googleEmail = prefs.getString('googleEmail');
-      googleName = prefs.getString('name');
-      photoUrl = prefs.getString('photoUrl');
+      googleName = prefs.getString('googleName');
+      googlePhoto = prefs.getString('googlePhoto');
     });
   }
 
@@ -67,9 +67,9 @@ class ProfileScreenState extends State<ProfileScreen> {
                     height: 120,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(100),
-                      child: photoUrl != null
+                      child: googlePhoto != null
                           ? Image(
-                              image: NetworkImage(photoUrl!),
+                              image: NetworkImage(googlePhoto!),
                               fit: BoxFit.cover,
                             )
                           : Image(

@@ -8,14 +8,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skiive/data/repositories/database_method.dart';
 import 'package:skiive/navigation.dart';
 
-class AuthMethods {
+class AuthMethods with ChangeNotifier {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  String googleLoading = 'init';
+
+  String get loadingState => googleLoading;
 
   getCurrentUser() async {
     return await auth.currentUser;
   }
 
   signInWithGoogle(BuildContext context) async {
+    googleLoading = 'processing';
+    notifyListeners();
+
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -35,14 +41,15 @@ class AuthMethods {
     final name = userDetails!.displayName;
     final email = userDetails.email;
     final photo = userDetails.photoURL;
+    final uid = userDetails.uid;
 
     if (result != null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("UserID", userDetails.uid);
+      prefs.setString("UserID", uid);
       prefs.setString("Name", name!);
       prefs.setString("Email", email!);
       prefs.setString("Photo", photo!);
-      // print('Helooooooooooo: ${googleSignInAuthentication?.idToken}');
+
       Map<String, dynamic> userInfoMap = {
         "email": userDetails.email,
         "name": userDetails.displayName,
@@ -52,8 +59,16 @@ class AuthMethods {
       await DatabaseMethods()
           .addUser(userDetails.uid, userInfoMap)
           .then((value) {
+        googleLoading = 'complete';
+        notifyListeners();
         Get.to(() => const Navigation());
+      }).catchError((e) {
+        googleLoading = 'init';
+        notifyListeners();
       });
+    } else {
+      googleLoading = 'init';
+      notifyListeners();
     }
   }
 }

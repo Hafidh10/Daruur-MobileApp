@@ -83,7 +83,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error fetching courses'));
+                    return Center(
+                        child: Text('You have not started any course!'));
                   } else {
                     List<MyCoursesModel> courses = snapshot.data!;
                     // Display your courses using ListView, GridView, or any other widget

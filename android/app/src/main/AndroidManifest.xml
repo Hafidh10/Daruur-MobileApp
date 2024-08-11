@@ -4,6 +4,7 @@
         android:label="skiive"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        
         <activity
             android:name=".MainActivity"
             android:enableOnBackInvokedCallback="true"
@@ -31,11 +32,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-        <meta-data
-            android:name="com.google.android.gms.client_id"
-            android:value="http://704150823441-7ke258oec8pk6dp2sovs0tibd32e53ac.apps.googleusercontent.com" />
+        
     </application>
 </manifest>

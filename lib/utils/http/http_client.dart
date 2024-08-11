@@ -8,6 +8,8 @@ class ApiEndPoints {
 class _AuthEndPoints {
   final String register = 'auth/signup';
   final String login = 'auth/signin';
+  final String googleLogin = 'auth/google/signin';
+  final String forgotPassword = 'auth/password-reset-request';
   final String studentProfile = 'students/profile';
   final String allCourses = 'course';
   final String bookmark = 'course-manager/bookmark';

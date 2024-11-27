@@ -59,4 +59,26 @@ class SkiiveValidator {
 
     return null;
   }
+
+  static String? validateMpesaNumber(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.isEmpty) {
+      return 'Please enter your number';
+    }
+
+    // Trim leading and trailing whitespace
+    value = value.trim();
+
+    // Check if the number starts with '254' and has the correct length
+    if (!value.startsWith('254') || value.length != 12) {
+      return 'Number must start with 254 and have 12 digits';
+    }
+
+    // Check if the remaining part of the string is numeric
+    if (!RegExp(r'^\d+$').hasMatch(value)) {
+      return 'Please enter a valid number';
+    }
+
+    return null; // Return null if the validation passes
+  }
 }

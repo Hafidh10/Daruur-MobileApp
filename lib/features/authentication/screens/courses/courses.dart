@@ -46,89 +46,94 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
   Future<List<MyCoursesModel>> getMyCourses() async {
     var coursesUrl = Uri.parse(
-        "https://emerge-lms-api.onrender.com/api/v1/course-manager/paid/$studentId");
+        "https://api.emergekenya.org/api/v1/course-manager/bookmarked/$studentId");
     final response = await http.get(coursesUrl, headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': 'Bearer $token',
     });
     var coursesData = json.decode(response.body);
-    final List body = coursesData['data']['courseManager'];
+    final List body = coursesData['data'];
 
     return body.map((e) => MyCoursesModel.fromJson(e)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: const BackButton(
-          color: Colors.blueAccent,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          leading: const BackButton(
+            color: Colors.blueAccent,
+          ),
+          title: Text(
+            'My Courses',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
         ),
-        title: Text(
-          'My Courses',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 25),
-          child: Column(
-            children: [
-              FutureBuilder<List<MyCoursesModel>>(
-                future:
-                    getMyCourses(), // Replace fetchCourses() with your function to fetch the courses data
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text('You have not started any course!'));
-                  } else {
-                    List<MyCoursesModel> courses = snapshot.data!;
-                    // Display your courses using ListView, GridView, or any other widget
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: GridView.builder(
-                                itemCount: courses.length,
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        mainAxisSpacing: 30,
-                                        crossAxisSpacing: 15,
-                                        mainAxisExtent: 220),
-                                itemBuilder: (context, index) =>
-                                    GestureDetector(
-                                        onTap: () {
-                                          Get.to(() => CourseSection(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 25),
+            child: Column(
+              children: [
+                FutureBuilder<List<MyCoursesModel>>(
+                  future:
+                      getMyCourses(), // Replace fetchCourses() with your function to fetch the courses data
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(
+                          child: Text('You have not started any course!'));
+                    } else {
+                      List<MyCoursesModel> courses = snapshot.data!;
+                      // Display your courses using ListView, GridView, or any other widget
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: GridView.builder(
+                                  itemCount: courses.length,
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          mainAxisSpacing: 30,
+                                          crossAxisSpacing: 15,
+                                          mainAxisExtent: 220),
+                                  itemBuilder: (context, index) =>
+                                      GestureDetector(
+                                          onTap: () {
+                                            Get.to(() => CourseSection(
                                                 name:
                                                     courses[index].course.name,
                                                 contentId: courses[index]
                                                     .course
                                                     .content,
-                                              ));
-                                        },
-                                        child: MyCoursesCard(
-                                          // ignore: unnecessary_string_interpolations
-                                          id: courses[index].course.content,
-                                          image: courses[index].course.image,
-                                          name: courses[index].course.name,
-                                        ))),
-                          )
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
+                                                courseId:
+                                                    courses[index].course.id));
+                                          },
+                                          child: MyCoursesCard(
+                                            // ignore: unnecessary_string_interpolations
+                                            id: courses[index].course.content,
+                                            image: courses[index].course.image,
+                                            name: courses[index].course.name,
+                                            price: courses[index].course.price,
+                                          ))),
+                            )
+                          ],
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

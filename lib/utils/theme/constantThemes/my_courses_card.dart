@@ -9,12 +9,14 @@ class MyCoursesCard extends StatefulWidget {
   final String id;
   final String image;
   final String name;
+  final int price;
 
   const MyCoursesCard({
     Key? key,
     required this.id,
     required this.image,
     required this.name,
+    required this.price,
   }) : super(key: key);
 
   @override
@@ -58,7 +60,7 @@ class MyCoursesCardState extends State<MyCoursesCard> {
                   height: 5,
                 ),
                 Text(
-                  '1000 Ksh',
+                  widget.price.toString(),
                   style:
                       TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),

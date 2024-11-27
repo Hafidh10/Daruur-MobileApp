@@ -22,11 +22,13 @@ import '../../../../utils/theme/constantThemes/relatedCard.dart';
 class CourseSection extends StatefulWidget {
   final String contentId;
   final String name;
+  final String courseId;
 
   const CourseSection({
     Key? key,
     required this.contentId,
     required this.name,
+    required this.courseId,
   }) : super(key: key);
 
   @override
@@ -46,7 +48,7 @@ class _CourseSectionState extends State<CourseSection> {
 
   Future<List<SectionModel>> getMyCourses(contentId) async {
     var coursesUrl = Uri.parse(
-        "https://emerge-lms-api.onrender.com/api/v1/course-section/student/$contentId");
+        "https://api.emergekenya.org/api/v1/course-section/student/$contentId");
     final response = await http.get(coursesUrl, headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -69,50 +71,53 @@ class _CourseSectionState extends State<CourseSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: const BackButton(
-          color: Colors.blueAccent,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          leading: const BackButton(
+            color: Colors.blueAccent,
+          ),
+          title: Text(
+            'Course Sections',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
         ),
-        title: Text(
-          'Course Sections',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: SkiiveColors.accent,
-                    borderRadius: BorderRadius.circular(8)),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(widget.name,
-                      style: Theme.of(context).textTheme.headlineMedium),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: SkiiveColors.accent,
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(widget.name,
+                        style: Theme.of(context).textTheme.headlineMedium),
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              FutureBuilder<List<SectionModel>>(
-                future: getMyCourses(widget.contentId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    List<SectionModel> sections = snapshot.data!;
-                    return CourseSectionList(sections: sections);
-                  }
-                },
-              ),
-            ],
+                const SizedBox(
+                  height: 12,
+                ),
+                FutureBuilder<List<SectionModel>>(
+                  future: getMyCourses(widget.contentId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      List<SectionModel> sections = snapshot.data!;
+                      return CourseSectionList(
+                          sections: sections, courseId: widget.courseId);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -122,8 +127,11 @@ class _CourseSectionState extends State<CourseSection> {
 
 class CourseSectionList extends StatelessWidget {
   final List<SectionModel> sections;
+  final String courseId;
 
-  const CourseSectionList({Key? key, required this.sections}) : super(key: key);
+  const CourseSectionList(
+      {Key? key, required this.sections, required this.courseId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +153,7 @@ class CourseSectionList extends StatelessWidget {
                     section: sections[index],
                     sections: sections,
                     index: index,
+                    courseId: courseId,
                   );
                 },
               ),
@@ -160,12 +169,14 @@ class CourseSectionListItem extends StatelessWidget {
   final SectionModel section;
   final List<SectionModel> sections;
   final int index;
+  final String courseId;
 
   const CourseSectionListItem({
     Key? key,
     required this.section,
     required this.sections,
     required this.index,
+    required this.courseId,
   }) : super(key: key);
 
   @override
@@ -180,13 +191,14 @@ class CourseSectionListItem extends StatelessWidget {
             return GestureDetector(
               onTap: () {
                 Get.to(CoursePlayer(
-                  subSectionId: subsection.id,
-                  subSectionTitle: subsection.title,
-                  sectionNumber: section.number,
-                  sectionTitle: section.title,
-                  sections: sections,
-                  index: index,
-                ));
+                    subSectionId: subsection.id,
+                    subSectionTitle: subsection.title,
+                    sectionNumber: section.number,
+                    sectionTitle: section.title,
+                    sectionID: section.id,
+                    sections: sections,
+                    index: index,
+                    courseId: courseId));
               },
               child: ListTile(
                 title: Text(subsection.title),

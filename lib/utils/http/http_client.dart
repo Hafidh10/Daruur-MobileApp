@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_declarations, library_private_types_in_public_api
 
 class ApiEndPoints {
-  static final String baseUrl = 'https://emerge-lms-api.onrender.com/api/v1/';
+  static final String baseUrl = 'https://api.emergekenya.org/api/v1/';
   static _AuthEndPoints authEndPoints = _AuthEndPoints();
 }
 
@@ -13,5 +13,7 @@ class _AuthEndPoints {
   final String studentProfile = 'students/profile';
   final String allCourses = 'course';
   final String bookmark = 'course-manager/bookmark';
+  final String pay = 'course-manager/pay';
+  final String certificate = 'certificate';
   // final String paid = 'course-manager/paid/';
 }

@@ -121,7 +121,9 @@ class LoginScreenState extends State<LoginScreen> {
             title: 'Login Successfully!',
             message: 'Welcome to Emerge Learning Management platform.');
 
-        Get.to(() => const Navigation());
+        Get.to(() => const Navigation())?.then((value) => setState(() {
+              loading = 'init';
+            }));
       } else if (response.statusCode == 401) {
         setState(() {
           loading = 'init';
@@ -214,8 +216,7 @@ class LoginScreenState extends State<LoginScreen> {
           setState(() {
             googleLoading = 'complete';
           });
-          Get.to(() => const Navigation());
-          Future.delayed(const Duration(seconds: 1), () {
+          Get.to(() => const Navigation())?.then((value) {
             setState(() {
               googleLoading = 'init';
             });

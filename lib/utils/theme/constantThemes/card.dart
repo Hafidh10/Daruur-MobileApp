@@ -7,11 +7,10 @@ import 'package:skiive/utils/constants/colors.dart';
 class SkiiveCard extends StatefulWidget {
   final String image;
   final String name;
-  const SkiiveCard({
-    Key? key,
-    required this.image,
-    required this.name,
-  }) : super(key: key);
+  final int price;
+  const SkiiveCard(
+      {Key? key, required this.image, required this.name, required this.price})
+      : super(key: key);
 
   @override
   SkiiveCardState createState() => SkiiveCardState();
@@ -54,7 +53,7 @@ class SkiiveCardState extends State<SkiiveCard> {
                   height: 5,
                 ),
                 Text(
-                  '1000 Ksh',
+                  widget.price.toString(),
                   style:
                       TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),

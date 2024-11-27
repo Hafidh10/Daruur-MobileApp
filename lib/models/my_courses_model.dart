@@ -5,12 +5,13 @@ class MyCoursesModel {
   final dynamic quiz;
   final Course course;
 
-  MyCoursesModel(
-      {required this.id,
-      this.assignment,
-      required this.paused,
-      this.quiz,
-      required this.course});
+  MyCoursesModel({
+    required this.id,
+    this.assignment,
+    required this.paused,
+    this.quiz,
+    required this.course,
+  });
 
   factory MyCoursesModel.fromJson(Map<String, dynamic> json) {
     return MyCoursesModel(
@@ -30,15 +31,16 @@ class Course {
   final String image;
   final String name;
   final String content;
+  final int price;
 
-  Course({
-    required this.id,
-    required this.category,
-    required this.description,
-    required this.image,
-    required this.name,
-    required this.content,
-  });
+  Course(
+      {required this.id,
+      required this.category,
+      required this.description,
+      required this.image,
+      required this.name,
+      required this.content,
+      required this.price});
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
@@ -48,6 +50,7 @@ class Course {
       image: json['image'],
       name: json['name'],
       content: json['content']['id'],
+      price: json['price'],
     );
   }
 }

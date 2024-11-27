@@ -233,6 +233,7 @@ class HomeScreenState extends State<HomeScreen> {
                                             // ignore: unnecessary_string_interpolations
                                             image: courses[index].image!,
                                             name: courses[index].name!,
+                                            price: courses[index].price!,
                                           ))),
                             )
                           ],
